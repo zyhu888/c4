@@ -50,7 +50,7 @@ with the highest silhouette score is returned.
 }
 \examples{
 library(MASS)
-set.seed(2)
+set.seed(123)
 
 # Generate covariates (200 nodes, 4 communities, 3 features per node)
 # Each community has a different mean vector in 3D space
