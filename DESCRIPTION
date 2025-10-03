@@ -1,0 +1,16 @@
+Package: covconnclust
+Title: Covariate Connectivity Combined Clustering (C-4)
+Version: 0.1.0
+Authors@R: 
+    person("Zeyu", "Hu", email = "zeyu.hu8888@gmail.com", role = c("aut", "cre"))
+Description: Implements Covariate Connectivity Combined Clustering (C-4) and related
+    methods (Spectral Clustering, Covariate-Assisted Spectral Clustering (CASC)), and 
+    provides utilities to generate weighted networks via a Stochastic Block Model (SBM).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports: 
+    MASS,
+    cluster,
+    stats
