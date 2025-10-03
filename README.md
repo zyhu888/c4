@@ -3,7 +3,7 @@ R package for Covariate Connectivity Combined Clustering (C-4), integrating cova
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-C4 (**Covariate Connectivity Combined Clustering**) is an adaptive spectral clustering algorithm that fuses network connectivity and node covariates into a unified martix representation for community detection.  
+C-4 (**Covariate Connectivity Combined Clustering**) is an adaptive spectral clustering algorithm that fuses network connectivity and node covariates into a unified martix representation for community detection.  
 
 This R package provides functions to:
 - Calculate distance matrices from heterogeneous covariates.
