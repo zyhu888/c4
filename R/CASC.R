@@ -5,7 +5,8 @@
 #' range of tuning parameters (\eqn{\alpha}) to balance structural and
 #' attribute information and selects the best clustering result.
 #'
-#'@importFrom stats kmeans
+#' @importFrom stats kmeans
+#' @importFrom MASS mvrnorm
 #'
 #' @param Adj An adjacency matrix of the network (symmetric, non-negative).
 #' @param Covariate A node covariate matrix where rows correspond to nodes
@@ -32,16 +33,41 @@
 #' Covariate-assisted spectral clustering. *Biometrika*, 104(2), 361–377.
 #'
 #' @examples
-#' # Example with toy adjacency and covariate matrices
-#' set.seed(123)
-#' Adj <- matrix(sample(0:1, 25, replace = TRUE), nrow = 5)
-#' Adj[lower.tri(Adj)] <- t(Adj)[lower.tri(Adj)]  # make symmetric
-#' diag(Adj) <- 0
+#' library(MASS)
+#' set.seed(2)
 #'
-#' Covariate <- matrix(rnorm(5 * 2), nrow = 5, ncol = 2)
+#' # Generate covariates (200 nodes, 4 communities, 3 features per node)
+#' # Each community has a different mean vector in 3D space
+#' n <- 200; k <- 4; d <- 10; se <- 3
+#' means <- matrix(c(
+#'   d / sqrt(8),  d / sqrt(8),  d / sqrt(8),
+#'   -d / sqrt(8), -d / sqrt(8),  d / sqrt(8),
+#'   -d / sqrt(8),  d / sqrt(8), -d / sqrt(8),
+#'   d / sqrt(8), -d / sqrt(8), -d / sqrt(8)
+#' ), nrow = 4, byrow = TRUE)
+#' cov_matrix <- diag(se^2, 3)
+#' community_sizes <- rep(n / k, k)
 #'
-#' casc_result <- CASC(Adj, Covariate, K = 2)
-#' casc_result$cluster
+#' # Simulate multivariate normal features for each community
+#' X <- do.call(rbind, lapply(1:k, function(c) {
+#'   mvrnorm(community_sizes[c], means[c, ], cov_matrix)
+#' }))
+#'
+#' # Generate adjacency matrix from a weighted SBM
+#' W <- gen_weighted_sbm(
+#'   node_num = 200,
+#'   cluster_size = rep(50, 4),
+#'   win_cluster_den = 0.3,
+#'   win_cluster_dist = "runif",
+#'   win_cluster_par = list(min = 1, max = 2),
+#'   btw_cluster_den = 0.2,
+#'   btw_cluster_dist = "runif",
+#'   btw_cluster_par = list(min = 1, max = 2)
+#' )$adjacency_matrix
+#'
+#' # Run CASC clustering
+#' result_CASC <- CASC(W, X, K = 4)
+#' result_CASC$cluster
 #'
 #' @export
 CASC <- function (Adj, Covariate, K, alphan = 5, itermax = 100, startn = 10) {
