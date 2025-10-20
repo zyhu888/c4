@@ -1,4 +1,4 @@
-Package: covconnclust
+Package: C4clust
 Title: Covariate Connectivity Combined Clustering (C-4)
 Version: 0.1.0
 Authors@R: 

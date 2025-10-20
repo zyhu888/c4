@@ -22,7 +22,7 @@ You can install the development version of **C4** from GitHub:
 install.packages("devtools")
 
 # Install this package from GitHub
-devtools::install_github("zyhu888/covconnclust")
+devtools::install_github("zyhu888/C4clust")
 
 # Load the package
-library(covconnclust)
+library(C4clust)
