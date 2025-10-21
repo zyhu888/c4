@@ -22,7 +22,7 @@ You can install the development version of **C4** from GitHub:
 install.packages("devtools")
 
 # Install this package from GitHub
-devtools::install_github("zyhu888/C4clust")
+devtools::install_github("zyhu888/c4")
 
 # Load the package
-library(C4clust)
+library(c4)
