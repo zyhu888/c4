@@ -15,8 +15,8 @@
 #' @param K Number of clusters, or a range of integers. If a range is given,
 #' the eigengap heuristic is used to select the best \code{K}. Default is \code{2:(n-1)}.
 #' @param alpha_seq A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}.
-#' @param itermax Maximum number of iterations for k-means. Default is 10.
-#' @param startn Number of random starts for k-means. Default is 10.
+#' @param epsilon A small positive constant added to avoid division by zero
+#' when computing inverse distances. Default is \code{1e-6}.
 #'
 #' @details
 #' The method forms a convex combination of adjacency and covariate similarity matrices:
@@ -77,7 +77,7 @@
 #'
 #' @export
 C4 <- function(adj_matrix, sim_matrix, K = NULL, alpha_seq = seq(0, 1, by = 0.1),
-               itermax = 10, startn = 10) {
+               epsilon = 1e-6) {
   n <- nrow(adj_matrix)
 
   # If K is not provided, set default K = 2:n-1
@@ -127,11 +127,11 @@ C4 <- function(adj_matrix, sim_matrix, K = NULL, alpha_seq = seq(0, 1, by = 0.1)
     Y <- X / sqrt(rowSums(X^2))
 
     # k-means clustering
-    kmeans_result <- kmeans(Y, centers = best_k, iter.max = itermax, nstart = startn)
+    kmeans_result <- kmeans(Y, centers = best_k, nstart = 10)
     membership <- kmeans_result$cluster
 
     # Silhouette score on inverse-distance graph
-    dist_graph <- as.dist(1 / (combined_matrix + 1e-6))
+    dist_graph <- as.dist(1 / (combined_matrix + epsilon))
     sil <- cluster::silhouette(membership, dist_graph)
     avg_sil <- mean(sil[, "sil_width"])
 

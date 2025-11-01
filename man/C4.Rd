@@ -9,8 +9,7 @@ C4(
   sim_matrix,
   K = NULL,
   alpha_seq = seq(0, 1, by = 0.1),
-  itermax = 10,
-  startn = 10
+  epsilon = 1e-06
 )
 }
 \arguments{
@@ -23,9 +22,8 @@ the eigengap heuristic is used to select the best \code{K}. Default is \code{2:(
 
 \item{alpha_seq}{A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}.}
 
-\item{itermax}{Maximum number of iterations for k-means. Default is 10.}
-
-\item{startn}{Number of random starts for k-means. Default is 10.}
+\item{epsilon}{A small positive constant added to avoid division by zero
+when computing inverse distances. Default is \code{1e-6}.}
 }
 \value{
 A list containing:
