@@ -2,13 +2,8 @@
 
 export(C4)
 export(CASC)
-export(Spectral_clustering)
-export(calculate_distance)
-export(gen_weighted_sbm)
 importFrom(MASS,mvrnorm)
-importFrom(cluster,daisy)
 importFrom(cluster,silhouette)
 importFrom(stats,as.dist)
 importFrom(stats,dist)
 importFrom(stats,kmeans)
-importFrom(stats,rbinom)

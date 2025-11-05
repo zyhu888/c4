@@ -4,26 +4,24 @@
 \alias{C4}
 \title{C4: Covariate Connectivity Combined Clustering}
 \usage{
-C4(
-  adj_matrix,
-  sim_matrix,
-  K = NULL,
-  alpha_seq = seq(0, 1, by = 0.1),
-  epsilon = 1e-06
-)
+C4(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1), epsilon = 1e-06)
 }
 \arguments{
-\item{adj_matrix}{Adjacency matrix of the network (symmetric, non-negative, with zero diagonal).}
+\item{adj}{Adjacency matrix of the network (symmetric, non-negative, with zero diagonal).}
 
-\item{sim_matrix}{Similarity matrix derived from covariates (symmetric, non-negative, with zero diagonal).}
+\item{sim}{Optional similarity matrix derived from covariates (symmetric, non-negative, with zero diagonal).
+If not provided, the function defaults to using the adjacency
+matrix (\code{adj}) as the similarity input, and automatically
+sets \code{alphagrid = 0} to perform standard spectral clustering
+based solely on network structure.}
 
 \item{K}{Number of clusters, or a range of integers. If a range is given,
 the eigengap heuristic is used to select the best \code{K}. Default is \code{2:(n-1)}.}
 
-\item{alpha_seq}{A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}.}
+\item{alphagrid}{A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}.}
 
 \item{epsilon}{A small positive constant added to avoid division by zero
-when computing inverse distances. Default is \code{1e-6}.}
+when computing inverse distances with silhouette score. Default is \code{1e-6}.}
 }
 \value{
 A list containing:
@@ -50,43 +48,31 @@ with the highest silhouette score is returned.
 library(MASS)
 set.seed(123)
 
-# Generate covariates (200 nodes, 4 communities, 3 features per node)
-# Each community has a different mean vector in 3D space
-n <- 200; k <- 4; d <- 10; se <- 3
-means <- matrix(c(
-  d / sqrt(8),  d / sqrt(8),  d / sqrt(8),
-  -d / sqrt(8), -d / sqrt(8),  d / sqrt(8),
-  -d / sqrt(8),  d / sqrt(8), -d / sqrt(8),
-  d / sqrt(8), -d / sqrt(8), -d / sqrt(8)
-), nrow = 4, byrow = TRUE)
-cov_matrix <- diag(se^2, 3)
-community_sizes <- rep(n / k, k)
+n <- 200; k <- 4; d <- 10; se <- 2
+z <- rep(1:k, each = n/k)
 
-# Simulate multivariate normal features for each community
-X <- do.call(rbind, lapply(1:k, function(c) {
-  mvrnorm(community_sizes[c], means[c, ], cov_matrix)
-}))
+# --- SBM adjacency ---
+p <- matrix(0.2, k, k); diag(p) <- 0.3
+A <- (matrix(runif(n^2), n, n) < p[z, z]) * 1
+A[lower.tri(A)] <- t(A)[lower.tri(A)]
+diag(A) <- 0
+# --- Covariates ---
+means <- matrix(c(
+  rep(d / sqrt(8), 3),
+  rep(c(-d, -d, d) / sqrt(8), 1),
+  rep(c(-d, d, -d) / sqrt(8), 1),
+  rep(c(d, -d, -d) / sqrt(8), 1)
+), nrow = k, byrow = TRUE)
+X <- do.call(rbind, lapply(1:k, \(i) MASS::mvrnorm(n/k, means[i, ], diag(se^2, 3))))
 
 # Compute similarity matrix from covariates (Euclidean → 1/distance)
 D <- as.matrix(dist(X))
 S <- 1 / D
 diag(S) <- 0
-
-# Generate adjacency matrix from a weighted SBM
-W <- gen_weighted_sbm(
-  node_num = 200,
-  cluster_size = rep(50, 4),
-  win_cluster_den = 0.3,
-  win_cluster_dist = "runif",
-  win_cluster_par = list(min = 1, max = 2),
-  btw_cluster_den = 0.2,
-  btw_cluster_dist = "runif",
-  btw_cluster_par = list(min = 1, max = 2)
-)$adjacency_matrix
-
-# Run C4 clustering
-result_C4 <- C4(W, S, alpha_seq = seq(0, 1, by = 0.1))
+result_C4 <- C4(A, S, alphagrid = seq(0, 1, by = 0.1))
+result_spe <- C4(A)
 result_C4
+result_spe
 
 }
 \references{
