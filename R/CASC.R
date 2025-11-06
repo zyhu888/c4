@@ -3,7 +3,7 @@
 #' Perform covariate-assisted spectral clustering (CASC) that integrates
 #' network connectivity and node covariates. The method searches over a
 #' range of tuning parameters (\eqn{\alpha}) to balance structural and
-#' attribute information and selects the best clustering result.
+#' covariate information and selects the best clustering result.
 #'
 #' @importFrom stats kmeans
 #' @importFrom MASS mvrnorm
@@ -12,15 +12,25 @@
 #' @param Covariate A node covariate matrix where rows correspond to nodes
 #' and columns to covariates.
 #' @param K The number of clusters to partition the nodes into (integer).
-#' @param alphan Number of candidate \eqn{\alpha} values to evaluate. Default is 5.
+#' @param n Number of \eqn{\alpha} values to evaluate in the grid search range. Default is 5.
 #' @param itermax Maximum number of iterations for k-means. Default is 100.
 #' @param startn Number of random starts for k-means. Default is 10.
 #'
 #' @details
-#' CASC integrates adjacency information with covariate similarity by forming
-#' a combined matrix \eqn{Z Z^\top + \alpha C}, where \eqn{Z} is the normalized
-#' adjacency and \eqn{C} is the covariate similarity. The tuning parameter
-#' \eqn{\alpha} is selected by minimizing within-cluster sum of squares.
+#' Covariate-assisted spectral clustering (CASC) is a community detection
+#' algorithm for networks with node covariates, proposed by
+#' Binkiewicz, Vogelstein, and Rohe (2017).
+#' Let \eqn{X \in \mathbb{R}^{n \times p}} be the covariate matrix,
+#' where each row corresponds to a node’s covariate vector.
+#' Define the regularized graph Laplacian as
+#' \deqn{L_\tau = D_\tau^{-1/2} A D_\tau^{-1/2},}
+#' where \eqn{D_\tau = D + \tau I} and \eqn{D} is the diagonal degree matrix of Adj matrix \eqn{A}.
+#' CASC then forms a balanced matrix:
+#' \deqn{\tilde{L}(\alpha) = L_\tau L_\tau + \alpha X X^\top,}
+#' where \eqn{\alpha} is a tuning parameter controlling the relative weight
+#' of covariate information.
+#' Clustering is performed by applying k-means on the first \eqn{K}
+#' leading eigenvectors of \eqn{\tilde{L}(\alpha)}.
 #'
 #' @return A list containing:
 #' \item{cluster}{Cluster membership assignments for each node.}
@@ -36,72 +46,69 @@
 #' library(MASS)
 #' set.seed(123)
 #'
-#' # Generate covariates (200 nodes, 4 communities, 3 features per node)
-#' # Each community has a different mean vector in 3D space
-#' n <- 200; k <- 4; d <- 10; se <- 3
+#' n <- 200; k <- 4; d <- 10; se <- 2
+#' z <- rep(1:k, each = n/k)
+#'
+#' # --- SBM adjacency ---
+#' p <- matrix(0.2, k, k); diag(p) <- 0.3
+#' A <- (matrix(runif(n^2), n, n) < p[z, z]) * 1
+#' A[lower.tri(A)] <- t(A)[lower.tri(A)]
+#' diag(A) <- 0
+#'
+#' # --- Covariates ---
 #' means <- matrix(c(
-#'   d / sqrt(8),  d / sqrt(8),  d / sqrt(8),
-#'   -d / sqrt(8), -d / sqrt(8),  d / sqrt(8),
-#'   -d / sqrt(8),  d / sqrt(8), -d / sqrt(8),
-#'   d / sqrt(8), -d / sqrt(8), -d / sqrt(8)
-#' ), nrow = 4, byrow = TRUE)
-#' cov_matrix <- diag(se^2, 3)
-#' community_sizes <- rep(n / k, k)
-#'
-#' # Simulate multivariate normal features for each community
-#' X <- do.call(rbind, lapply(1:k, function(c) {
-#'   mvrnorm(community_sizes[c], means[c, ], cov_matrix)
-#' }))
-#'
-#' # Generate adjacency matrix from a weighted SBM
-#' W <- gen_weighted_sbm(
-#'   node_num = 200,
-#'   cluster_size = rep(50, 4),
-#'   win_cluster_den = 0.3,
-#'   win_cluster_dist = "runif",
-#'   win_cluster_par = list(min = 1, max = 2),
-#'   btw_cluster_den = 0.2,
-#'   btw_cluster_dist = "runif",
-#'   btw_cluster_par = list(min = 1, max = 2)
-#' )$adjacency_matrix
+#'   rep(d / sqrt(8), 3),
+#'   rep(c(-d, -d, d) / sqrt(8), 1),
+#'   rep(c(-d, d, -d) / sqrt(8), 1),
+#'   rep(c(d, -d, -d) / sqrt(8), 1)
+#' ), nrow = k, byrow = TRUE)
+#' X <- do.call(rbind, lapply(1:k, \(i) MASS::mvrnorm(n/k, means[i, ], diag(se^2, 3))))
 #'
 #' # Run CASC clustering
-#' result_CASC <- CASC(W, X, K = 4)
-#' result_CASC$cluster
+#' result_CASC <- CASC(A, X, K = 4)
+#' result_CASC
 #'
 #' @export
-CASC <- function (Adj, Covariate, K, alphan = 5, itermax = 100, startn = 10) {
-  s = rowSums(Adj)
-  s = s + mean(s)
-  s = s^(-1/2)
-  S = diag(s)
-  Z = S %*% Adj %*% S
-  net.eigen = eigen(Z %*% Z)
-  ca = Covariate %*% t(Covariate)
-  ca.eigen = eigen(ca)
+CASC <- function(Adj, Covariate, K, n = 5, itermax = 100, startn = 10) {
+
+  # Normalized Laplacian
+  D <- diag(rowSums(Adj) + mean(rowSums(Adj)))
+  D_inv_sqrt <- diag(diag(D)^(-0.5))
+  V <- D_inv_sqrt %*% Adj %*% D_inv_sqrt
+
+  # Eigen decomposition
+  net_eigen <- eigen(V %*% V, symmetric = TRUE)
+  ca <- Covariate %*% t(Covariate)
+  ca_eigen <- eigen(ca, symmetric = TRUE)
+
+  # candidate alpha
   R <- ncol(Covariate)
-  if (R <= K) {
-    alphaupper <- net.eigen$values[1] / ca.eigen$values[R]
-  } else {
-    alphaupper <- net.eigen$values[1] / (ca.eigen$values[K] - ca.eigen$values[K + 1])
+  alpha_upper <- ifelse(R <= K,
+                        net_eigen$values[1] / ca_eigen$values[R],
+                        net_eigen$values[1] / (ca_eigen$values[K] - ca_eigen$values[K + 1]))
+  alpha_lower <- (net_eigen$values[K] - net_eigen$values[K + 1]) / ca_eigen$values[1]
+  alphagrid <- seq(alpha_lower, alpha_upper, length.out = n)
+
+  # cluster for each alpha
+  within_ss <- numeric(n)
+  clusters <- matrix(0, n, nrow(Adj))
+  for (i in 1:n) {
+    eigen_decomp <- eigen(V %*% V + alphagrid[i] * ca, symmetric = TRUE)
+    X <- eigen_decomp$vectors[, 1:K]
+    row_norms <- sqrt(rowSums(X^2))
+    valid_idx <- row_norms > 0
+    Y <- X
+    Y[valid_idx, ] <- X[valid_idx, ] / row_norms[valid_idx]
+    kmeans_result <- kmeans(Y[valid_idx, ], K, iter.max = itermax, nstart = startn)
+    clusters[i, valid_idx] <- kmeans_result$cluster
+    within_ss[i] <- kmeans_result$tot.withinss
   }
-  alphalower = (net.eigen$values[K] - net.eigen$values[K + 1]) / ca.eigen$values[1]
-  d = rep(0, alphan)
-  alpha = seq(alphalower, alphaupper, length.out = alphan)
-  est = matrix(0, alphan, dim(Adj)[1])
-  Norm <- function(x) sqrt(sum(x^2))
-  for (ii in 1:alphan) {
-    casc.eigen = eigen(Z %*% Z + alpha[ii] * ca)
-    U = casc.eigen$vectors[, 1:K]
-    Unorm = apply(U, 1, Norm)
-    indu = which(Unorm > 0)
-    U = U[indu, ] / Unorm[indu]
-    result = kmeans(U, K, iter.max = itermax, nstart = startn)
-    d[ii] = result$tot.withinss
-    est[ii, indu] = as.factor(result$cluster)
-  }
-  best_index = which.min(d)
-  result = est[best_index, ]
-  best_alpha = alpha[best_index]
-  return(list(cluster = result, alpha = best_alpha, alphalower = alphalower, alphaupper = alphaupper))
+  # return result
+  best_idx <- which.min(within_ss)
+  return(list(
+    cluster = clusters[best_idx, ],
+    alpha = alphagrid[best_idx],
+    alphalower = alpha_lower,
+    alphaupper = alpha_upper
+  ))
 }

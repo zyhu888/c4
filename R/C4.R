@@ -12,22 +12,20 @@
 #'
 #' @param adj Adjacency matrix of the network (symmetric, non-negative, with zero diagonal).
 #' @param sim Optional similarity matrix derived from covariates (symmetric, non-negative, with zero diagonal).
-#' If not provided, the function defaults to using the adjacency
-#' matrix (\code{adj}) as the similarity input, and automatically
-#' sets \code{alphagrid = 0} to perform standard spectral clustering
-#' based solely on network structure.
+#' If not provided, the function sets \eqn{\alpha = 0} to perform standard spectral clustering
+#' based solely on Adjacency matrix.
 #' @param K Number of clusters, or a range of integers. If a range is given,
 #' the eigengap heuristic is used to select the best \code{K}. Default is \code{2:(n-1)}.
-#' @param alphagrid A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}.
+#' @param alphagrid A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}. Ignored when \code{sim = NULL}.
 #' @param epsilon A small positive constant added to avoid division by zero
-#' when computing inverse distances with silhouette score. Default is \code{1e-6}.
+#' when computing inverse distances with silhouette score. Default is \code{1e-6}. Ignored when \code{sim = NULL}.
 #'
 #' @details
-#' The method forms a convex combination of adjacency and covariate similarity matrices:
+#' The method forms a combination of adjacency and covariate similarity matrices:
 #' \deqn{(1-\alpha)W + \alpha S,}
 #' where \eqn{W} is the adjacency matrix and \eqn{S} is the covariate similarity.
 #' For each \eqn{\alpha}, the normalized Laplacian is computed, eigen-decomposition
-#' is performed, and k-means is applied on the spectral embedding. The solution
+#' is performed, and k-means is applied on the spectral embedding. The clustering result
 #' with the highest silhouette score is returned.
 #'
 #' @return A list containing:
@@ -62,8 +60,12 @@
 #' D <- as.matrix(dist(X))
 #' S <- 1 / D
 #' diag(S) <- 0
+#'
+#' # C4 clustering on both adj and sim
 #' result_C4 <- C4(A, S, alphagrid = seq(0, 1, by = 0.1))
+#' # spectrum clustering on adj only
 #' result_spe <- C4(A)
+#'
 #' result_C4
 #' result_spe
 #'

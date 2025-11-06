@@ -4,7 +4,7 @@
 \alias{CASC}
 \title{Covariate-Assisted Spectral Clustering (CASC)}
 \usage{
-CASC(Adj, Covariate, K, alphan = 5, itermax = 100, startn = 10)
+CASC(Adj, Covariate, K, n = 5, itermax = 100, startn = 10)
 }
 \arguments{
 \item{Adj}{An adjacency matrix of the network (symmetric, non-negative).}
@@ -14,7 +14,7 @@ and columns to covariates.}
 
 \item{K}{The number of clusters to partition the nodes into (integer).}
 
-\item{alphan}{Number of candidate \eqn{\alpha} values to evaluate. Default is 5.}
+\item{n}{Number of \eqn{\alpha} values to evaluate in the grid search range. Default is 5.}
 
 \item{itermax}{Maximum number of iterations for k-means. Default is 100.}
 
@@ -31,50 +31,49 @@ A list containing:
 Perform covariate-assisted spectral clustering (CASC) that integrates
 network connectivity and node covariates. The method searches over a
 range of tuning parameters (\eqn{\alpha}) to balance structural and
-attribute information and selects the best clustering result.
+covariate information and selects the best clustering result.
 }
 \details{
-CASC integrates adjacency information with covariate similarity by forming
-a combined matrix \eqn{Z Z^\top + \alpha C}, where \eqn{Z} is the normalized
-adjacency and \eqn{C} is the covariate similarity. The tuning parameter
-\eqn{\alpha} is selected by minimizing within-cluster sum of squares.
+Covariate-assisted spectral clustering (CASC) is a community detection
+algorithm for networks with node covariates, proposed by
+Binkiewicz, Vogelstein, and Rohe (2017).
+Let \eqn{X \in \mathbb{R}^{n \times p}} be the covariate matrix,
+where each row corresponds to a node’s covariate vector.
+Define the regularized graph Laplacian as
+\deqn{L_\tau = D_\tau^{-1/2} A D_\tau^{-1/2},}
+where \eqn{D_\tau = D + \tau I} and \eqn{D} is the diagonal degree matrix of Adj matrix \eqn{A}.
+CASC then forms a balanced matrix:
+\deqn{\tilde{L}(\alpha) = L_\tau L_\tau + \alpha X X^\top,}
+where \eqn{\alpha} is a tuning parameter controlling the relative weight
+of covariate information.
+Clustering is performed by applying k-means on the first \eqn{K}
+leading eigenvectors of \eqn{\tilde{L}(\alpha)}.
 }
 \examples{
 library(MASS)
 set.seed(123)
 
-# Generate covariates (200 nodes, 4 communities, 3 features per node)
-# Each community has a different mean vector in 3D space
-n <- 200; k <- 4; d <- 10; se <- 3
+n <- 200; k <- 4; d <- 10; se <- 2
+z <- rep(1:k, each = n/k)
+
+# --- SBM adjacency ---
+p <- matrix(0.2, k, k); diag(p) <- 0.3
+A <- (matrix(runif(n^2), n, n) < p[z, z]) * 1
+A[lower.tri(A)] <- t(A)[lower.tri(A)]
+diag(A) <- 0
+
+# --- Covariates ---
 means <- matrix(c(
-  d / sqrt(8),  d / sqrt(8),  d / sqrt(8),
-  -d / sqrt(8), -d / sqrt(8),  d / sqrt(8),
-  -d / sqrt(8),  d / sqrt(8), -d / sqrt(8),
-  d / sqrt(8), -d / sqrt(8), -d / sqrt(8)
-), nrow = 4, byrow = TRUE)
-cov_matrix <- diag(se^2, 3)
-community_sizes <- rep(n / k, k)
-
-# Simulate multivariate normal features for each community
-X <- do.call(rbind, lapply(1:k, function(c) {
-  mvrnorm(community_sizes[c], means[c, ], cov_matrix)
-}))
-
-# Generate adjacency matrix from a weighted SBM
-W <- gen_weighted_sbm(
-  node_num = 200,
-  cluster_size = rep(50, 4),
-  win_cluster_den = 0.3,
-  win_cluster_dist = "runif",
-  win_cluster_par = list(min = 1, max = 2),
-  btw_cluster_den = 0.2,
-  btw_cluster_dist = "runif",
-  btw_cluster_par = list(min = 1, max = 2)
-)$adjacency_matrix
+  rep(d / sqrt(8), 3),
+  rep(c(-d, -d, d) / sqrt(8), 1),
+  rep(c(-d, d, -d) / sqrt(8), 1),
+  rep(c(d, -d, -d) / sqrt(8), 1)
+), nrow = k, byrow = TRUE)
+X <- do.call(rbind, lapply(1:k, \(i) MASS::mvrnorm(n/k, means[i, ], diag(se^2, 3))))
 
 # Run CASC clustering
-result_CASC <- CASC(W, X, K = 4)
-result_CASC$cluster
+result_CASC <- CASC(A, X, K = 4)
+result_CASC
 
 }
 \references{
