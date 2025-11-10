@@ -92,14 +92,14 @@ CASC <- function(Adj, Covariate, K, n = 5, itermax = 100, startn = 10) {
   # cluster for each alpha
   within_ss <- numeric(n)
   clusters <- matrix(0, n, nrow(Adj))
+
   for (i in 1:n) {
     eigen_decomp <- eigen(V %*% V + alphagrid[i] * ca, symmetric = TRUE)
     X <- eigen_decomp$vectors[, 1:K]
     row_norms <- sqrt(rowSums(X^2))
     valid_idx <- row_norms > 0
-    Y <- X
-    Y[valid_idx, ] <- X[valid_idx, ] / row_norms[valid_idx]
-    kmeans_result <- kmeans(Y[valid_idx, ], K, iter.max = itermax, nstart = startn)
+    X[valid_idx, ] <- X[valid_idx, ] / row_norms[valid_idx]
+    kmeans_result <- kmeans(X[valid_idx, ], K, iter.max = itermax, nstart = startn)
     clusters[i, valid_idx] <- kmeans_result$cluster
     within_ss[i] <- kmeans_result$tot.withinss
   }
@@ -112,3 +112,4 @@ CASC <- function(Adj, Covariate, K, n = 5, itermax = 100, startn = 10) {
     alphaupper = alpha_upper
   ))
 }
+
