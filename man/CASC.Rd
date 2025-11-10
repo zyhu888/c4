@@ -4,7 +4,7 @@
 \alias{CASC}
 \title{Covariate-Assisted Spectral Clustering (CASC)}
 \usage{
-CASC(Adj, Covariate, K, n = 5, itermax = 100, startn = 10)
+CASC(Adj, Covariate, K, n = 5, ...)
 }
 \arguments{
 \item{Adj}{An adjacency matrix of the network (symmetric, non-negative).}
@@ -16,9 +16,8 @@ and columns to covariates.}
 
 \item{n}{Number of \eqn{\alpha} values to evaluate in the grid search range. Default is 5.}
 
-\item{itermax}{Maximum number of iterations for k-means. Default is 100.}
-
-\item{startn}{Number of random starts for k-means. Default is 10.}
+\item{...}{Additional arguments passed to \code{kmeans()}, such as
+\code{nstart}, \code{iter.max}, or initialization settings.}
 }
 \value{
 A list containing:
@@ -72,7 +71,7 @@ means <- matrix(c(
 X <- do.call(rbind, lapply(1:k, \(i) MASS::mvrnorm(n/k, means[i, ], diag(se^2, 3))))
 
 # Run CASC clustering
-result_CASC <- CASC(A, X, K = 4)
+result_CASC <- CASC(A, X, K = 4, iter.max = 100, nstart = 10)
 result_CASC
 
 }

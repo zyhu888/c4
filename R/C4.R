@@ -17,8 +17,8 @@
 #' @param K Number of clusters, or a range of integers. If a range is given,
 #' the eigengap heuristic is used to select the best \code{K}. Default is \code{2:(n-1)}.
 #' @param alphagrid A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}. Ignored when \code{sim = NULL}.
-#' @param epsilon A small positive constant added to avoid division by zero
-#' when computing inverse distances with silhouette score. Default is \code{1e-6}. Ignored when \code{sim = NULL}.
+#' @param ... Additional arguments passed to \code{kmeans()}, such as
+#' \code{nstart}, \code{iter.max}, or initialization settings.
 #'
 #' @details
 #' The method forms a combination of adjacency and covariate similarity matrices:
@@ -62,7 +62,7 @@
 #' diag(S) <- 0
 #'
 #' # C4 clustering on both adj and sim
-#' result_C4 <- C4(A, S, alphagrid = seq(0, 1, by = 0.1))
+#' result_C4 <- C4(A, S, iter.max = 100, nstart = 10)
 #' # spectrum clustering on adj only
 #' result_spe <- C4(A)
 #'
@@ -70,8 +70,7 @@
 #' result_spe
 #'
 #' @export
-C4 <- function(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1),
-               epsilon = 1e-6) {
+C4 <- function(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1),...) {
   n <- nrow(adj)
 
   # If sim is NULL, force alpha = 0 (pure spectral clustering)
@@ -127,12 +126,12 @@ C4 <- function(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1),
     # k-means clustering
     X <- eigenvectors[, 1:best_k]
     Y <- X / sqrt(rowSums(X^2))
-    kmeans_result <- kmeans(Y, centers = best_k, nstart = 10, iter.max = 100)
+    kmeans_result <- kmeans(Y, centers = best_k, ...)
     membership <- kmeans_result$cluster
 
     # Only compute silhouette if sim is provided (for alpha selection)
     if (!is.null(sim)) {
-      dist_graph <- as.dist(1 / (combined_matrix + epsilon))
+      dist_graph <- as.dist(1 / (combined_matrix + 1e-6))
       sil <- cluster::silhouette(membership, dist_graph)
       avg_sil <- mean(sil[, "sil_width"])
 
@@ -150,10 +149,11 @@ C4 <- function(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1),
       best_silhouette <- NA
     }
   }
-
-  return(list(
-    alpha = best_alpha,
-    K = best_K,
-    cluster = best_cluster
-  ))
+ result <- list(
+   alpha = best_alpha,
+   K = best_K,
+   cluster = best_cluster
+ )
+ class(result) <- "C4"
+ return(result)
 }

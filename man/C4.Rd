@@ -4,13 +4,7 @@
 \alias{C4}
 \title{C4: Covariate Connectivity Combined Clustering}
 \usage{
-C4(
-  adj,
-  sim = NULL,
-  K = 2:(n - 1),
-  alphagrid = seq(0, 1, by = 0.1),
-  epsilon = 1e-06
-)
+C4(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1), ...)
 }
 \arguments{
 \item{adj}{Adjacency matrix of the network (symmetric, non-negative, with zero diagonal).}
@@ -24,8 +18,8 @@ the eigengap heuristic is used to select the best \code{K}. Default is \code{2:(
 
 \item{alphagrid}{A numeric vector of candidate alpha values. Default is \code{seq(0, 1, by = 0.1)}. Ignored when \code{sim = NULL}.}
 
-\item{epsilon}{A small positive constant added to avoid division by zero
-when computing inverse distances with silhouette score. Default is \code{1e-6}. Ignored when \code{sim = NULL}.}
+\item{...}{Additional arguments passed to \code{kmeans()}, such as
+\code{nstart}, \code{iter.max}, or initialization settings.}
 }
 \value{
 A list containing:
@@ -75,7 +69,7 @@ S <- 1 / D
 diag(S) <- 0
 
 # C4 clustering on both adj and sim
-result_C4 <- C4(A, S, alphagrid = seq(0, 1, by = 0.1))
+result_C4 <- C4(A, S, iter.max = 100, nstart = 10)
 # spectrum clustering on adj only
 result_spe <- C4(A)
 

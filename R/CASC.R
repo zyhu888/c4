@@ -13,8 +13,8 @@
 #' and columns to covariates.
 #' @param K The number of clusters to partition the nodes into (integer).
 #' @param n Number of \eqn{\alpha} values to evaluate in the grid search range. Default is 5.
-#' @param itermax Maximum number of iterations for k-means. Default is 100.
-#' @param startn Number of random starts for k-means. Default is 10.
+#' @param ... Additional arguments passed to \code{kmeans()}, such as
+#' \code{nstart}, \code{iter.max}, or initialization settings.
 #'
 #' @details
 #' Covariate-assisted spectral clustering (CASC) is a community detection
@@ -65,11 +65,11 @@
 #' X <- do.call(rbind, lapply(1:k, \(i) MASS::mvrnorm(n/k, means[i, ], diag(se^2, 3))))
 #'
 #' # Run CASC clustering
-#' result_CASC <- CASC(A, X, K = 4)
+#' result_CASC <- CASC(A, X, K = 4, iter.max = 100, nstart = 10)
 #' result_CASC
 #'
 #' @export
-CASC <- function(Adj, Covariate, K, n = 5, itermax = 100, startn = 10) {
+CASC <- function(Adj, Covariate, K, n = 5, ...) {
 
   # Normalized Laplacian
   D <- diag(rowSums(Adj) + mean(rowSums(Adj)))
@@ -99,17 +99,19 @@ CASC <- function(Adj, Covariate, K, n = 5, itermax = 100, startn = 10) {
     row_norms <- sqrt(rowSums(X^2))
     valid_idx <- row_norms > 0
     X[valid_idx, ] <- X[valid_idx, ] / row_norms[valid_idx]
-    kmeans_result <- kmeans(X[valid_idx, ], K, iter.max = itermax, nstart = startn)
+    kmeans_result <- kmeans(X[valid_idx, ], K,...)
     clusters[i, valid_idx] <- kmeans_result$cluster
     within_ss[i] <- kmeans_result$tot.withinss
   }
   # return result
   best_idx <- which.min(within_ss)
-  return(list(
+  result <- list(
     cluster = clusters[best_idx, ],
     alpha = alphagrid[best_idx],
     alphalower = alpha_lower,
     alphaupper = alpha_upper
-  ))
+  )
+  class(result) <- "CASC"
+  return(result)
 }
 
