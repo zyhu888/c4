@@ -4,7 +4,13 @@
 \alias{C4}
 \title{C4: Covariate Connectivity Combined Clustering}
 \usage{
-C4(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1), epsilon = 1e-06)
+C4(
+  adj,
+  sim = NULL,
+  K = 2:(n - 1),
+  alphagrid = seq(0, 1, by = 0.1),
+  epsilon = 1e-06
+)
 }
 \arguments{
 \item{adj}{Adjacency matrix of the network (symmetric, non-negative, with zero diagonal).}

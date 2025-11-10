@@ -70,14 +70,9 @@
 #' result_spe
 #'
 #' @export
-C4 <- function(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1),
+C4 <- function(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1),
                epsilon = 1e-6) {
   n <- nrow(adj)
-
-  # If K is not provided, set default K = 2:n-1
-  if (is.null(K)) {
-    K <- 2:(n - 1)
-  }
 
   # If sim is NULL, force alpha = 0 (pure spectral clustering)
   if (is.null(sim)) {
