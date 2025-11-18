@@ -1,0 +1,144 @@
+---
+title: "c4-introduction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{c4-introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(c4)
+library(MASS)
+set.seed(123)
+```
+
+# Introduction
+
+The **c4** package provides tools for clustering networks using both the 
+adjacency structure and node-level covariates. Many real networks contain not 
+only edges but also attributes for each node, and combining these two sources 
+of information can lead to more accurate and stable community detection.
+
+The package implements two methods:
+
+1. C⁴ (Covariate Connectivity Combined Clustering)  
+  Combines the adjacency matrix and a covariate-based similarity matrix through 
+  a tuning parameter α. The method searches over a grid of α values and 
+  automatically selects the best α and the best number of clusters using the 
+  silhouette score.
+
+2. CASC (Covariate-Assisted Spectral Clustering)  
+  A covariate-assisted version of spectral clustering from Binkiewicz et al. 
+  (2017). CASC requires the number of clusters K to be specified and selects α 
+  using k-means within-cluster variation.
+
+This vignette shows how to simulate data, run both methods, and interpret the 
+clustering results.
+
+
+# Data Preparation
+
+Both C⁴ and CASC require an adjacency matrix to represent the network. The 
+adj matrix must be symmetric, non-negative with zero diagonal.
+
+For C⁴, an additional similarity matrix may be supplied. This 
+should also be symmetric, non-negative with a zero diagonal. If no similarity 
+matrix is provided, C⁴ automatically reduces to spectral clustering.
+
+For CASC, the node covariate matrix X is required. Rows correspond to nodes 
+and columns correspond to covariates. CASC constructs its own similarity 
+through \(X X^\top\).
+
+Below we simulate an example adjacency matrix and covariates that will be used 
+throughout the vignette.
+```{r echo=FALSE}
+n <- 200; k <- 4; d <- 10; se <- 2
+z <- rep(1:k, each = n/k)
+
+# --- SBM adjacency ---
+p <- matrix(0.2, k, k); diag(p) <- 0.3
+A <- (matrix(runif(n^2), n, n) < p[z, z]) * 1
+A[lower.tri(A)] <- t(A)[lower.tri(A)]
+diag(A) <- 0
+
+# --- Covariates ---
+means <- matrix(c(
+  rep(d / sqrt(8), 3),
+  rep(c(-d, -d, d) / sqrt(8), 1),
+  rep(c(-d, d, -d) / sqrt(8), 1),
+  rep(c(d, -d, -d) / sqrt(8), 1)
+), nrow = k, byrow = TRUE)
+X <- do.call(rbind, lapply(1:k, \(i) MASS::mvrnorm(n/k, means[i, ], diag(se^2, 3))))
+
+# Compute similarity matrix from covariates (Euclidean → 1/distance)
+D <- as.matrix(dist(X))
+S <- 1 / D
+diag(S) <- 0
+```
+
+# Running C⁴
+
+We first apply the C⁴ method, which combines the adjacency matrix and the 
+covariate-derived similarity matrix through a tuning parameter α. The algorithm 
+searches over a grid of α values and automatically selects the number of clusters
+by eigengap and best α using the silhouette score. Running C⁴ requires providing 
+the adjacency matrix `adj`, the similarity matrix `sim`, and optional number of clusters
+`K` and k-means settings.
+
+In addition to the combined method, we also run spectral clustering (Ng et al., 2002) 
+as a baseline. This is obtained by calling `C4()` without supplying a similarity 
+matrix `sim`, which forces α = 0 and uses only the adjacency matrix. This 
+also serves as a baseline comparison to illustrate the benefit of incorporating 
+covariate information.
+
+Running C⁴ requires providing the adjacency matrix `A`, the similarity matrix 
+`S`, and optional k-means settings.
+```{r echo=FALSE}
+# C4 clustering on both adj and sim
+result_C4 <- C4(A, S, iter.max = 100, nstart = 10)
+# spectrum clustering on adj only
+result_spe <- C4(A)
+
+result_C4
+result_spe
+```
+
+# Running CASC
+
+We next apply the CASC (Covariate-Assisted Spectral Clustering) method 
+(Binkiewicz, Vogelstein & Rohe, 2017). CASC incorporates covariate information 
+by adding a term \( \alpha X X^\top \) to the graph Laplacian, where \(X\) is 
+the node-level covariate matrix. Unlike C⁴, CASC requires the number of 
+clusters `K` to be specified in advance. 
+
+To run CASC, we supply the adjacency matrix `Adj`, the covariate matrix 
+`Covariate`, and the desired number of clusters `K`. As before, additional 
+arguments can be passed to `kmeans()`.
+```{r echo=FALSE}
+# run CASC clustering
+result_CASC <- CASC(
+  Adj = A,
+  Covariate = X,
+  K = 4,
+  iter.max = 100,
+  nstart = 10
+)
+
+result_CASC
+```
+
+# Interpretation
+
+Both C⁴ and CASC return an object that includes the cluster assignments and other 
+important parameters. For simulated data, both methods could recover the underlying 
+community structure and perform better than the baseline spectral clustering, although 
+their behavior may differ depending on how strongly the network and covariates support 
+the clusters. 
+
+More detailed comparisons can be found in manuscript: XXX.
+
