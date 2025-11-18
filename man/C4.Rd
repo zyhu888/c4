@@ -39,8 +39,8 @@ The method forms a combination of adjacency and covariate similarity matrices:
 \deqn{(1-\alpha)W + \alpha S,}
 where \eqn{W} is the adjacency matrix and \eqn{S} is the covariate similarity.
 For each \eqn{\alpha}, the normalized Laplacian is computed, eigen-decomposition
-is performed, and k-means is applied on the spectral embedding. The clustering result
-with the highest silhouette score is returned.
+is performed, number of clusters is determined by eigengap, and k-means is applied
+on the spectral embedding. The clustering result with the highest silhouette score is returned.
 }
 \examples{
 library(MASS)
