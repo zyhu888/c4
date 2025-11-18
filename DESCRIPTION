@@ -14,3 +14,7 @@ Imports:
     MASS,
     cluster,
     stats
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

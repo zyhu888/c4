@@ -2,7 +2,7 @@
 % Please edit documentation in R/C4.R
 \name{C4}
 \alias{C4}
-\title{C4: Covariate Connectivity Combined Clustering}
+\title{Covariate Connectivity Combined Clustering (C⁴)}
 \usage{
 C4(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1), ...)
 }
@@ -22,17 +22,17 @@ the eigengap heuristic is used to select the best \code{K}. Default is \code{2:(
 \code{nstart}, \code{iter.max}, or initialization settings.}
 }
 \value{
-A list containing:
+An object of class \code{"C4"} containing:
 \item{alpha}{The selected alpha value.}
 \item{K}{The selected number of clusters.}
 \item{cluster}{Cluster membership assignments for each node.}
 }
 \description{
-Perform C4 clustering, an adaptive spectral clustering method that integrates
-network connectivity with node covariates for unknown number of communities.
-The algorithm searches over a sequence of tuning parameters (\eqn{\alpha}) to
-balance adjacency and covariate similarity, and selects the best result based
-on silhouette score.
+Perform Covariate Connectivity Combined Clustering (C⁴), an adaptive spectral
+clustering method that integrates network connectivity with node covariates
+for unknown number of communities. The algorithm searches over a sequence of
+tuning parameters (\eqn{\alpha}) to balance adjacency and covariate similarity,
+and selects the best result based on silhouette score.
 }
 \details{
 The method forms a combination of adjacency and covariate similarity matrices:

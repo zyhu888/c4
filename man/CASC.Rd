@@ -20,11 +20,10 @@ and columns to covariates.}
 \code{nstart}, \code{iter.max}, or initialization settings.}
 }
 \value{
-A list containing:
-\item{cluster}{Cluster membership assignments for each node.}
+An object of class \code{"CASC"} containing:
 \item{alpha}{The selected tuning parameter value.}
-\item{alphalower}{Lower bound of the search range for \eqn{\alpha}.}
-\item{alphaupper}{Upper bound of the search range for \eqn{\alpha}.}
+\item{alpha range}{Lower and Upper bound of the search range for \eqn{\alpha}.}
+\item{cluster}{Cluster membership assignments for each node.}
 }
 \description{
 Perform covariate-assisted spectral clustering (CASC) that integrates

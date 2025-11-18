@@ -32,11 +32,10 @@
 #' Clustering is performed by applying k-means on the first \eqn{K}
 #' leading eigenvectors of \eqn{\tilde{L}(\alpha)}.
 #'
-#' @return A list containing:
-#' \item{cluster}{Cluster membership assignments for each node.}
+#' @return An object of class \code{"CASC"} containing:
 #' \item{alpha}{The selected tuning parameter value.}
-#' \item{alphalower}{Lower bound of the search range for \eqn{\alpha}.}
-#' \item{alphaupper}{Upper bound of the search range for \eqn{\alpha}.}
+#' \item{alpha range}{Lower and Upper bound of the search range for \eqn{\alpha}.}
+#' \item{cluster}{Cluster membership assignments for each node.}
 #'
 #' @references
 #' Binkiewicz, N., Vogelstein, J. T., & Rohe, K. (2017).
