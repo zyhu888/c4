@@ -1,11 +1,6 @@
 c4: Covariate Connectivity Combined Clustering
 ================
 
-- [Covariate Connectivity Combined Clustering
-  ($\text{C}^4$)](#covariate-connectivity-combined-clustering-textc4)
-  - [Installation](#installation)
-  - [References](#references)
-
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -22,10 +17,10 @@ This R package provides functions to:
   user-defined block structures and weight distributions;
 
 - perform $\text{C}^4$ for joint network-covariate community detection
-  \[@hu2025covariate\];
+  (Hu et al. 2025);
 
 - apply covariate-assisted spectral clustering as a competing method
-  \[@binkiewicz2017covariate\].
+  (Binkiewicz, Vogelstein, and Rohe 2017).
 
 ## Installation
 
@@ -37,3 +32,22 @@ devtools::install_github("zyhu888/c4")
 ```
 
 ## References
+
+<div id="refs" class="references csl-bib-body hanging-indent"
+entry-spacing="0">
+
+<div id="ref-binkiewicz2017covariate" class="csl-entry">
+
+Binkiewicz, N., J. T. Vogelstein, and K. Rohe. 2017. “Covariate-Assisted
+Spectral Clustering.” *Biometrika* 104 (2): 361–77.
+
+</div>
+
+<div id="ref-hu2025covariate" class="csl-entry">
+
+Hu, Z., W. Li, J. Yan, and P. Zhang. 2025. “Covariate Connectivity
+Combined Clustering for Weighted Networks.” University of Connecticut.
+
+</div>
+
+</div>
