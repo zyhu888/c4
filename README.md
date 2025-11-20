@@ -4,7 +4,7 @@ c4: Covariate Connectivity Combined Clustering
 [![License:
 MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-# Covariate Connectivity Combined Clustering ($\text{C}^4$)
+## Covariate Connectivity Combined Clustering ($\text{C}^4$)
 
 The package implements the Covariate Connectivity Combined Clustering
 ($\text{C}^4$) method, which integrates both network topology and
