@@ -1,19 +1,28 @@
 Package: c4
 Title: Covariate Connectivity Combined Clustering (C-4)
 Version: 0.1.0
-Authors@R: 
-    person("Zeyu", "Hu", email = "zeyu.hu8888@gmail.com", role = c("aut", "cre"))
-Description: Implements Covariate Connectivity Combined Clustering (C-4) and related
-    methods (Spectral Clustering, Covariate-Assisted Spectral Clustering (CASC)), and 
-    provides utilities to generate weighted networks via a Stochastic Block Model (SBM).
+Authors@R: c( 
+    person("Zeyu", "Hu", email = "zeyu.hu8888@gmail.com", role = c("aut", "cre")),
+    person("Wenrui", "Li", , "wenrui.li@uconn.edu", role = c("aut")),
+    person("Jun", "Yan", , "jun.yan@uconn.edu", role = c("aut"),
+           comment = c(ORCID = "0000-0003-4401-7296"))
+    person("Panpan", "Zhang", , "panpan.zhang@vumc.org", role = c("aut"),
+           comment = c(ORCID = "0000-0002-8211-5930")))
+Description: The c4 package implements Covariate Connectivity Combined Clustering (C-4) 
+    for community detection in networks, along with utility functions for network generation, 
+    covariate-assisted spectral clustering (CASC) implementation, and related analyses.
+Depends: R (>= 2.10)
 License: MIT + file LICENSE
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
     MASS,
     cluster,
     stats
+URL: https://github.com/zyhu888/c4
+BugReports: https://github.com/zyhu888/c4/issues
 Suggests: 
     knitr,
     rmarkdown
