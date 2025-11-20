@@ -1,9 +1,7 @@
 ---
 title: "c4: Covariate Connectivity Combined Clustering"
-output: 
-  github_document:
-    toc: true
-  bibliography: inst/REFERENCES.bib
+output: github_document
+bibliography: inst/REFERENCES.bib
 ---
 
 ```{r, echo = FALSE}
