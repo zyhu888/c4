@@ -1,27 +1,39 @@
-# C⁴: Covariate Connectivity Combined Clustering
-R package for Covariate Connectivity Combined Clustering (C⁴), integrating covariate similarity and network structure for community detection.
+c4: Covariate Connectivity Combined Clustering
+================
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+- [Covariate Connectivity Combined Clustering
+  ($\text{C}^4$)](#covariate-connectivity-combined-clustering-textc4)
+  - [Installation](#installation)
+  - [References](#references)
 
-C⁴ (**Covariate Connectivity Combined Clustering**) is an adaptive spectral clustering algorithm that fuses network connectivity and node covariates into a unified matrix representation for community detection.  
+[![License:
+MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+# Covariate Connectivity Combined Clustering ($\text{C}^4$)
+
+The package implements the Covariate Connectivity Combined Clustering
+($\text{C}^4$) method, which integrates both network topology and
+node-level covariates to improve community detection in weighted
+networks.
 
 This R package provides functions to:
-- Perform spectral clustering on adjacency matrix (Ng, Jordan, & Weiss, 2002). 
-- Implement proposed C⁴, an adaptive method that fuses connectivity and covariates for data-driven community detection.
-- Perform CASC（covariate-assisted spectral clustering, Binkiewicz, Vogelstein, & Rohe, 2017).
 
----
+- simulate weighted networks under stochastic block models with
+  user-defined block structures and weight distributions;
+
+- perform $\text{C}^4$ for joint network-covariate community detection
+  \[@hu2025covariate\];
+
+- apply covariate-assisted spectral clustering as a competing method
+  \[@binkiewicz2017covariate\].
 
 ## Installation
 
-You can install the development version of **C4** from GitHub:
+You can install $\texttt{c4}$ from github with:
 
-```r
-# Install devtools if not already installed
-install.packages("devtools")
-
-# Install this package from GitHub
+``` r
+# install.packages("devtools")
 devtools::install_github("zyhu888/c4")
+```
 
-# Load the package
-library(c4)
+## References
