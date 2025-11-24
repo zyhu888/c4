@@ -13,9 +13,6 @@ networks.
 
 This R package provides functions to:
 
-- simulate weighted networks under stochastic block models with
-  user-defined block structures and weight distributions;
-
 - perform $\text{C}^4$ for joint network-covariate community detection
   (Hu et al. 2025);
 
