@@ -70,13 +70,64 @@
 #' result_spe
 #'
 #' @export
-C4 <- function(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1),...) {
+C4 <- function(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1),...) {
+  # Checks for adjacency matrix
+  adj <- as.matrix(adj)
+
+  if (nrow(adj) != ncol(adj)) {
+    stop("Adjacency matrix must be square!", call. = FALSE)
+  }
+
+  if (any(adj < 0, na.rm = TRUE)) {
+    stop("Adjacency matrix must be non-negative!", call. = FALSE)
+  }
+
+  if (!isTRUE(all.equal(adj, t(adj)))) {
+    stop("Adjacency matrix must be symmetric.", call. = FALSE)
+  }
+
+  if (any(diag(adj) != 0, na.rm = TRUE)) {
+    warning("Adjacency matrix has non-zero diagonal; setting diagonal entries to 0!",
+            call. = FALSE)
+    diag(adj) <- 0
+  }
+
   n <- nrow(adj)
 
-  # If sim is NULL, force alpha = 0 (pure spectral clustering)
+  if (is.null(K)) {
+    K <- 2:(n - 1)
+  }
+
+  # If sim is NULL, force alpha = 0 (standard spectral clustering)
   if (is.null(sim)) {
     alphagrid <- 0
-    message("No similarity matrix provided. Running pure spectral clustering (alpha = 0).")
+    message("No similarity matrix is provided; running standard spectral clustering (alpha = 0)!")
+  } else {
+    ## Checks for sim
+    sim <- as.matrix(sim)
+
+    if (nrow(sim) != ncol(sim) || nrow(sim) != n) {
+      stop("Similarity matrix must be square and have the same dimension as adjacency matrix",
+           call. = FALSE)
+    }
+
+    if (!isTRUE(all.equal(sim, t(sim)))) {
+      stop("Similarity matrix must be symmetric!", call. = FALSE)
+    }
+
+    if (any(diag(sim) != 0, na.rm = TRUE)) {
+      warning("Similarity matrix has non-zero diagonal; setting diagonal entries to 0.",
+              call. = FALSE)
+      diag(sim) <- 0
+    }
+
+    ## Compute scaling factor only if sim is provided
+    if (sum(sim) == 0) {
+      stop("Similarity matrix 'sim' sums to zero; cannot compute scaling factor.",
+           call. = FALSE)
+    }
+    scale_factor <- sum(adj) / sum(sim)
+    sim_scaled   <- sim * scale_factor
   }
 
   # Initialize best metrics
@@ -84,13 +135,6 @@ C4 <- function(adj, sim = NULL, K = 2:(n - 1), alphagrid = seq(0, 1, by = 0.1),.
   best_alpha <- NA
   best_K <- NA
   best_cluster <- NULL
-
-  # Compute scaling factor only if sim is provided
-  if (!is.null(sim)) {
-    diag(sim) <- 0
-    scale_factor <- sum(adj) / sum(sim)
-    sim_scaled <- sim * scale_factor
-  }
 
   # Loop over all candidate alpha values
   for (alpha in alphagrid) {

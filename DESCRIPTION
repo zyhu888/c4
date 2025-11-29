@@ -12,7 +12,7 @@ Description: The c4 package implements Covariate Connectivity Combined Clusterin
     for community detection in networks, along with utility functions for network generation, 
     covariate-assisted spectral clustering (CASC) implementation, and related analyses.
 Depends: R (>= 2.10)
-License: MIT + file LICENSE
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
