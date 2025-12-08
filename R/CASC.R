@@ -106,6 +106,7 @@ CASC <- function(Adj, Covariate, K, n = 5, ...) {
   best_idx <- which.min(within_ss)
   result <- list(
     cluster = clusters[best_idx, ],
+    K = K,
     alpha = alphagrid[best_idx],
     alphalower = alpha_lower,
     alphaupper = alpha_upper

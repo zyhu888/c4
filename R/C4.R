@@ -196,7 +196,9 @@ C4 <- function(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1),...) {
  result <- list(
    alpha = best_alpha,
    K = best_K,
-   cluster = best_cluster
+   cluster = best_cluster,
+   alphalower = min(alphagrid),
+   alphaupper = max(alphagrid)
  )
  class(result) <- "C4"
  return(result)
