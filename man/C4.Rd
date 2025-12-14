@@ -9,7 +9,9 @@ C4(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1), ...)
 \arguments{
 \item{adj}{Adjacency matrix of the network (symmetric, non-negative, with zero diagonal).}
 
-\item{sim}{Optional similarity matrix derived from covariates (symmetric, non-negative, with zero diagonal).
+\item{sim}{Optional similarity matrix derived from covariates (symmetric, same dimension
+as adjacency matrix). Negative values are allowed, but the function conducts sanity checks
+to ensure validity. Non-negative similarity values are recommended.
 If not provided, the function sets \eqn{\alpha = 0} to perform standard spectral clustering
 based solely on Adjacency matrix.}
 
