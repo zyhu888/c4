@@ -11,7 +11,9 @@
 #' @importFrom MASS mvrnorm
 #'
 #' @param adj Adjacency matrix of the network (symmetric, non-negative, with zero diagonal).
-#' @param sim Optional similarity matrix derived from covariates (symmetric, non-negative, with zero diagonal).
+#' @param sim Optional similarity matrix derived from covariates (symmetric, same dimension
+#' as adjacency matrix). Negative values are allowed, but the function conducts sanity checks
+#' to ensure validity. Non-negative similarity values are recommended.
 #' If not provided, the function sets \eqn{\alpha = 0} to perform standard spectral clustering
 #' based solely on Adjacency matrix.
 #' @param K Number of clusters, or a range of integers. If a range is given,
@@ -115,12 +117,6 @@ C4 <- function(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1),...) {
       stop("Similarity matrix must be symmetric!", call. = FALSE)
     }
 
-    if (any(diag(sim) != 0, na.rm = TRUE)) {
-      warning("Similarity matrix has non-zero diagonal; setting diagonal entries to 0.",
-              call. = FALSE)
-      diag(sim) <- 0
-    }
-
     ## Compute scaling factor only if sim is provided
     if (sum(sim) == 0) {
       stop("Similarity matrix 'sim' sums to zero; cannot compute scaling factor.",
@@ -149,6 +145,11 @@ C4 <- function(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1),...) {
 
     # Normalized Laplacian
     D <- diag(rowSums(combined_matrix))
+    if (any(diag(D) <= 0, na.rm = TRUE)) {
+      stop("Non-positive degree detected; the normalized Laplacian is undefined.
+           Please check for negative values in the similarity matrix!", call. = FALSE
+      )
+    }
     D_inv_sqrt <- solve(sqrt(D))
     V <- D_inv_sqrt %*% combined_matrix %*% D_inv_sqrt
     L <- diag(nrow(D)) - V
