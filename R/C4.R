@@ -71,11 +71,12 @@
 #'
 #' # C4 clustering on both adj and sim
 #' result_C4 <- C4(A, S, iter.max = 100, nstart = 10)
+#' result_C4
+#'
 #' # spectrum clustering on adj only
 #' result_spe <- C4(A)
-#'
-#' result_C4
 #' result_spe
+#'
 #'
 #' @export
 C4 <- function(adj, sim = NULL, K = NULL, alphagrid = seq(0, 1, by = 0.1),...) {
