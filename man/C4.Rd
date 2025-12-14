@@ -28,6 +28,8 @@ An object of class \code{"C4"} containing:
 \item{alpha}{The selected alpha value.}
 \item{K}{The selected number of clusters.}
 \item{cluster}{Cluster membership assignments for each node.}
+\item{alphalower}{Lower bound of the alpha search grid.}
+\item{alphaupper}{Upper bound of the alpha search grid.}
 }
 \description{
 Perform Covariate Connectivity Combined Clustering (C⁴), an adaptive spectral
@@ -80,5 +82,8 @@ result_spe
 
 }
 \references{
-Work in progress (manuscript in preparation).#'
+Hu, Z., Li, W., Yan, J., and Zhang, P. (2025).
+\emph{Covariate Connectivity Combined Clustering for Weighted Networks}.
+arXiv:2511.17302 \link{stat.ME, stat.CO}.
+Available at \url{https://doi.org/10.48550/arXiv.2511.17302}.
 }
