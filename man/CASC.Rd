@@ -7,7 +7,7 @@
 CASC(Adj, Covariate, K, n = 5, ...)
 }
 \arguments{
-\item{Adj}{An adjacency matrix of the network (symmetric, non-negative).}
+\item{Adj}{An adjacency matrix of the network (symmetric, non-negative, with zero diagonal).}
 
 \item{Covariate}{A node covariate matrix where rows correspond to nodes
 and columns to covariates.}
@@ -22,8 +22,10 @@ and columns to covariates.}
 \value{
 An object of class \code{"CASC"} containing:
 \item{alpha}{The selected tuning parameter value.}
-\item{alpha range}{Lower and Upper bound of the search range for \eqn{\alpha}.}
+\item{K}{The number of clusters.}
 \item{cluster}{Cluster membership assignments for each node.}
+\item{alphalower}{Lower bound of the alpha search grid.}
+\item{alphaupper}{Upper bound of the alpha search grid.}
 }
 \description{
 Perform covariate-assisted spectral clustering (CASC) that integrates

@@ -8,7 +8,7 @@
 #' @importFrom stats kmeans
 #' @importFrom MASS mvrnorm
 #'
-#' @param Adj An adjacency matrix of the network (symmetric, non-negative).
+#' @param Adj An adjacency matrix of the network (symmetric, non-negative, with zero diagonal).
 #' @param Covariate A node covariate matrix where rows correspond to nodes
 #' and columns to covariates.
 #' @param K The number of clusters to partition the nodes into (integer).
@@ -34,8 +34,10 @@
 #'
 #' @return An object of class \code{"CASC"} containing:
 #' \item{alpha}{The selected tuning parameter value.}
-#' \item{alpha range}{Lower and Upper bound of the search range for \eqn{\alpha}.}
+#' \item{K}{The number of clusters.}
 #' \item{cluster}{Cluster membership assignments for each node.}
+#' \item{alphalower}{Lower bound of the alpha search grid.}
+#' \item{alphaupper}{Upper bound of the alpha search grid.}
 #'
 #' @references
 #' Binkiewicz, N., Vogelstein, J. T., & Rohe, K. (2017).
@@ -69,6 +71,30 @@
 #'
 #' @export
 CASC <- function(Adj, Covariate, K, n = 5, ...) {
+
+  if (nrow(Adj) != ncol(Adj)) {
+    stop("Adjacency matrix must be square!", call. = FALSE)
+  }
+
+  if (any(Adj < 0, na.rm = TRUE)) {
+    stop("Adjacency matrix must be non-negative!", call. = FALSE)
+  }
+
+  if (!isTRUE(all.equal(Adj, t(Adj)))) {
+    stop("Adjacency matrix must be symmetric.", call. = FALSE)
+  }
+
+  if (any(diag(Adj) != 0, na.rm = TRUE)) {
+    warning("Adjacency matrix has non-zero diagonal; setting diagonal entries to 0!",
+            call. = FALSE)
+    diag(Adj) <- 0
+  }
+
+  if (nrow(Covariate) != nrow(Adj)) {
+    stop("The covariate matrix must have the same number of rows as the adjacency matrix!",
+      call. = FALSE
+    )
+  }
 
   # Normalized Laplacian
   D <- diag(rowSums(Adj) + mean(rowSums(Adj)))
@@ -105,9 +131,9 @@ CASC <- function(Adj, Covariate, K, n = 5, ...) {
   # return result
   best_idx <- which.min(within_ss)
   result <- list(
-    cluster = clusters[best_idx, ],
-    K = K,
     alpha = alphagrid[best_idx],
+    K = K,
+    cluster = clusters[best_idx, ],
     alphalower = alpha_lower,
     alphaupper = alpha_upper
   )
