@@ -2,6 +2,7 @@
 title: "c4: Covariate Connectivity Combined Clustering"
 output: github_document
 bibliography: inst/REFERENCES.bib
+csl: inst/author-date-citeorder.csl
 ---
 
 ```{r, echo = FALSE}
@@ -22,7 +23,7 @@ This R package provides functions to:
 
 - simulate weighted networks under stochastic block models with user-defined block structures and weight distributions;
 
-- perform $\text{C}^4$ for joint network-covariate community detection [@hu2025covariate];
+- perform $\text{C}^4$ for joint network-covariate community detection [@hu2026covariate];
 
 - apply covariate-assisted spectral clustering as a competing method [@binkiewicz2017covariate].
 
@@ -33,6 +34,21 @@ You can install $\texttt{c4}$ from github with:
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("zyhu888/c4")
+```
+
+## Citation
+
+If you use `c4` in your research, please cite:
+
+```bibtex
+@article{hu2026covariate,
+  title   = {Covariate Connectivity Combined Clustering for Weighted Networks},
+  author  = {Hu, Zeyu and Li, Wenrui and Yan, Jun and Zhang, Panpan},
+  journal = {Physica A: Statistical Mechanics and its Applications},
+  volume  = 704,
+  pages   = 132177,
+  year    = 2026
+}
 ```
 
 ## References
