@@ -52,10 +52,10 @@ If you use `c4` in your research, please cite:
 
 <div id="ref-hu2026covariate" class="csl-entry">
 
-Hu, Zeyu, Wenrui Li, Jun Yan, and Panpan Zhang. 2026. “Covariate
-Connectivity Combined Clustering for Weighted Networks.” *Physica A:
+Hu, Zeyu, Wenrui Li, Jun Yan, and Panpan Zhang. 2026. “[Covariate
+Connectivity Combined Clustering for Weighted
+Networks](https://doi.org/10.1016/j.physa.2026.132177).” *Physica A:
 Statistical Mechanics and its Applications* 704: 132177.
-<https://doi.org/10.1016/j.physa.2026.132177>.
 
 </div>
 
